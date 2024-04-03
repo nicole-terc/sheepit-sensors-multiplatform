@@ -80,7 +80,7 @@ fun SamplingPeriod.toSamplingPeriodUs() =
 
 fun SensorEvent.toMultiplatformSensorEvent() =
     MultiplatformSensorEvent(
-        values = this.values.toList().toPersistentList(),
+        values = this.values,
         accuracy = this.accuracy,
         timestamp = this.timestamp
     )

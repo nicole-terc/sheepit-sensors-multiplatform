@@ -44,7 +44,7 @@ data class MultiplatformSensor(
 )
 
 data class MultiplatformSensorEvent(
-    val values: ImmutableList<Float>,
+    val values: FloatArray,
     val accuracy: Int,
     val timestamp: Long,
 )
@@ -60,14 +60,14 @@ interface MultiplatformSensorManager {
     fun registerListener(
         listener: MultiplatformSensorEventListener,
         sensorType: MultiplatformSensorType,
-        samplingPeriod: SamplingPeriod = SamplingPeriod.UI
+        samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL
     )
 
     fun unregisterListener(sensorType: MultiplatformSensorType)
 
     fun registerListener(
         sensorType: MultiplatformSensorType,
-        samplingPeriod: SamplingPeriod = SamplingPeriod.UI,
+        samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL,
         onSensorChanged: (MultiplatformSensorEvent) -> Unit,
     ) {
         registerListener(

@@ -16,7 +16,6 @@ class AndroidSensorManager(
 ) : MultiplatformSensorManager {
 
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-
     private val listeners: MutableMap<MultiplatformSensorType, SensorEventListener> = mutableMapOf()
 
     override fun getSensorList(sensorType: MultiplatformSensorType): List<MultiplatformSensor> {
@@ -61,5 +60,4 @@ class AndroidSensorManager(
     override fun unregisterListener(sensorType: MultiplatformSensorType) {
         listeners[sensorType]?.let { sensorManager.unregisterListener(it) }
     }
-
 }

@@ -6,14 +6,13 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import ui.SensorPlaygroundScreen
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
         Surface {
-            SensorPlaygroundScreen(modifier = Modifier.fillMaxWidth())
+            AnimatedSensorsScreen(modifier = Modifier.fillMaxWidth())
         }
     }
 }
