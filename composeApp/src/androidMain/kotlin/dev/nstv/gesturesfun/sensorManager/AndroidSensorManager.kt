@@ -77,7 +77,7 @@ class AndroidSensorManager(
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
                 println("event received: ${event.sensor.type.toMultiplatformSensorType()}")
-                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                if (event.sensor.type == Sensor.TYPE_GRAVITY) {
                     accelerometerReading = event.values
                 } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
                     magnetometerReading = event.values
@@ -94,14 +94,20 @@ class AndroidSensorManager(
 
                     val orientationAngles = FloatArray(3)
                     SensorManager.getOrientation(rotationMatrix, orientationAngles)
+//
+//                    val azimuth = Math.toDegrees(orientationAngles[0].toDouble())
+//                    val pitch = Math.toDegrees(orientationAngles[1].toDouble())
+//                    val roll = Math.toDegrees(orientationAngles[2].toDouble())
+//
+//                    println("Azimuth: $azimuth, Pitch: $pitch, Roll: $roll")
 
-                    val azimuth = Math.toDegrees(orientationAngles[0].toDouble())
-                    val pitch = Math.toDegrees(orientationAngles[1].toDouble())
-                    val roll = Math.toDegrees(orientationAngles[2].toDouble())
+                    println("Azimuth: ${orientationAngles[0]}, Pitch: ${orientationAngles[1]}, Roll: ${orientationAngles[2]}")
 
-                    println("Azimuth: $azimuth, Pitch: $pitch, Roll: $roll")
-
-                    onOrientationChanged(azimuth.toFloat(), pitch.toFloat(), roll.toFloat())
+                    onOrientationChanged(
+                        orientationAngles[0],
+                        orientationAngles[1],
+                        orientationAngles[2]
+                    )
                 }
             }
 
@@ -110,7 +116,7 @@ class AndroidSensorManager(
             }
         }
 
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let {
+        sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)?.let {
             sensorManager.registerListener(
                 sensorEventListener,
                 it,

@@ -2,9 +2,7 @@ package ui
 
 import ScreenSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -34,9 +32,13 @@ import getScreenSize
 import kotlinx.coroutines.launch
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
-import sensorManager.MultiplatformSensorType
+import util.mapValues
 import util.observeLifecycle
-import kotlin.math.abs
+import util.toDegrees
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 data class SheepUiState(
     val sheep: Sheep = Sheep(),
@@ -105,19 +107,57 @@ fun AnimatedSensorsScreen(
 
         // Orientation
         sensorManager.observeOrientationChanges { azimuth, pitch, roll ->
-//            if (
-//                abs(sheepRotation.value.x - pitch - 90) > DegreesThreshold ||
-//                abs(sheepRotation.value.y - roll) > DegreesThreshold
-//            ) {
+
             coroutineScope.launch {
+                // Straightforward orientation
+                val degreesX = mapValues(
+                    value = pitch,
+                    fromStart = -PI.toFloat() / 2,
+                    fromEnd = PI.toFloat() / 2,
+                    toStart = -90f,
+                    toEnd = 90f,
+                )
+
+                val degreesY = mapValues(
+                    value = roll,
+                    fromStart = -PI.toFloat(),
+                    fromEnd = PI.toFloat(),
+                    toStart = -90f,
+                    toEnd = 90f,
+                )
+
                 sheepRotation.animateTo(
                     Offset(
-                        x = pitch,
-                        y = roll,
+                        x = degreesX,
+                        y = degreesY,
                     ),
                 )
             }
-//            }
+            coroutineScope.launch {
+                // Styled movement
+                val offsetX = mapValues(
+                    value = roll,
+                    fromStart = -PI.toFloat(),
+                    fromEnd = PI.toFloat(),
+                    toStart = -screenSize.widthPx / 2f,
+                    toEnd = screenSize.widthPx / 2f,
+                )
+
+                val offsetY = mapValues(
+                    value = pitch,
+                    fromStart = -PI.toFloat() / 2,
+                    fromEnd = PI.toFloat() / 2,
+                    toStart = -screenSize.heightPx / 2f,
+                    toEnd = screenSize.heightPx / 2f,
+                )
+
+                sheepTranslation.animateTo(
+                    Offset(
+                        x = offsetX,
+                        y = -offsetY,
+                    )
+                )
+            }
         }
 
         onDispose {
