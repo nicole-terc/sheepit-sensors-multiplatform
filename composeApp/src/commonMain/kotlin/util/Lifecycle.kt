@@ -12,7 +12,6 @@ enum class LifecycleEvent {
     onCreate, onStart, onResume, onPause, onStop, onDestroy, onAny
 }
 
-
 object LifecycleOwner {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val _lifecycleEvents = MutableSharedFlow<LifecycleEvent>()
@@ -24,7 +23,6 @@ object LifecycleOwner {
         }
     }
 }
-
 
 @Composable
 fun observeLifecycle(

@@ -25,4 +25,9 @@ class iOSSensorManager : MultiplatformSensorManager {
         TODO("Not yet implemented")
     }
 
+    override fun unregisterAll() {
+        TODO("Not yet implemented")
+    }
+
+
 }

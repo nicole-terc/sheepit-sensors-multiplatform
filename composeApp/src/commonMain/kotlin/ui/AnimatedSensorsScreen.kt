@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +26,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.nstv.composablesheep.library.ComposableSheep
 import dev.nstv.composablesheep.library.model.Sheep
@@ -36,11 +34,8 @@ import kotlinx.coroutines.launch
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType
-import util.LifecycleEvent
-import util.LifecycleOwner
 import util.observeLifecycle
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 data class SheepUiState(
     val sheep: Sheep = Sheep(),
@@ -75,7 +70,6 @@ fun AnimatedSensorsScreen(
         lowerBound = Offset(-screenSize.widthPx / 2f, -screenSize.heightPx / 2f),
         upperBound = Offset(screenSize.widthPx / 2f, screenSize.heightPx / 2f),
     )
-
 
     // Gesture states
     val decay = rememberSplineBasedDecay<Offset>()
@@ -148,6 +142,4 @@ fun AnimatedSensorsScreen(
         )
     }
 }
-
-fun Offset.toIntOffset() = IntOffset(x.roundToInt(), y.roundToInt())
 
