@@ -29,6 +29,7 @@ enum class MultiplatformSensorType {
     STEP_DETECTOR,
     UNKNOWN,
     TYPE_ALL,
+    CUSTOM_ORIENTATION,
 }
 
 enum class SamplingPeriod {
@@ -62,6 +63,7 @@ interface MultiplatformSensorManager {
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL
     )
+
     fun registerListener(
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL,
@@ -89,5 +91,9 @@ interface MultiplatformSensorManager {
     fun unregisterListener(sensorType: MultiplatformSensorType)
     fun unregisterAll()
 
+    // Specific Readings
+    fun observeOrientationChanges(
+        onOrientationChanged: (azimuth: Float, pitch: Float, roll: Float) -> Unit
+    )
 }
 

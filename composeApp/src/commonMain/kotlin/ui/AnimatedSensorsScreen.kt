@@ -2,6 +2,7 @@ package ui
 
 import ScreenSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.rememberSplineBasedDecay
@@ -46,6 +47,7 @@ data class SheepUiState(
 
 const val SensorMagnitude = 500f
 const val AccelerationThreshold = 1f
+const val DegreesThreshold = 3f
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -54,17 +56,16 @@ fun AnimatedSensorsScreen(
     screenSize: ScreenSize = getScreenSize(),
     sensorManager: MultiplatformSensorManager = rememberSensorManager(),
 ) {
-    var initSensorManager by remember { mutableStateOf(0) }
-
+    val coroutineScope = rememberCoroutineScope()
+    var onResumeToggle by remember { mutableStateOf(false) }
     observeLifecycle(
-        onResume = { initSensorManager++ },
+        onResume = { onResumeToggle = !onResumeToggle },
         onPause = { sensorManager.unregisterAll() }
     )
 
-    val coroutineScope = rememberCoroutineScope()
-
     // Sheep Properties
     val sheepScale = remember { Animatable(1f) }
+    val sheepRotation = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
     val sheepTranslation = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
     sheepTranslation.updateBounds(
         lowerBound = Offset(-screenSize.widthPx / 2f, -screenSize.heightPx / 2f),
@@ -73,37 +74,50 @@ fun AnimatedSensorsScreen(
 
     // Gesture states
     val decay = rememberSplineBasedDecay<Offset>()
-
     var isDragging by remember { mutableStateOf(false) }
     val draggableState = rememberDraggable2DState { delta ->
-        coroutineScope.launch {
-            sheepTranslation.snapTo(sheepTranslation.value.plus(delta))
-        }
+        coroutineScope.launch { sheepTranslation.snapTo(sheepTranslation.value.plus(delta)) }
     }
 
-    DisposableEffect(initSensorManager) {
-        sensorManager.registerListener(MultiplatformSensorType.GYROSCOPE) { sensorEvent ->
+    DisposableEffect(onResumeToggle) {
+        // Gyroscope
+//        sensorManager.registerListener(MultiplatformSensorType.GYROSCOPE) { sensorEvent ->
+//
+//            val xValue = sensorEvent.values[0]
+//            val yValue = sensorEvent.values[1]
+//            val zValue = sensorEvent.values[2]
+//
+//            if (isDragging || (abs(yValue) < AccelerationThreshold && abs(xValue) < AccelerationThreshold)) return@registerListener
+//
+//            println("GyroScopeEvent: $sensorEvent, values: ${sensorEvent.values.joinToString(",")}")
+//
+//            val velocity = Offset(SensorMagnitude.times(yValue), SensorMagnitude.times(xValue))
+//
+//            val decayOffset = decay.calculateTargetValue(
+//                typeConverter = Offset.VectorConverter,
+//                initialValue = sheepTranslation.value,
+//                initialVelocity = velocity,
+//            )
+//            coroutineScope.launch {
+//                sheepTranslation.animateTo(decayOffset, initialVelocity = velocity)
+//            }
+//        }
 
-            val xValue = sensorEvent.values[0]
-            val yValue = sensorEvent.values[1]
-            val zValue = sensorEvent.values[2]
-
-            if (isDragging || (abs(yValue) < AccelerationThreshold && abs(xValue) < AccelerationThreshold)) return@registerListener
-
-            println("sensorEvent: $sensorEvent, values: ${sensorEvent.values.joinToString(",")}")
-
-
-            val velocity = Offset(SensorMagnitude.times(yValue), SensorMagnitude.times(xValue))
-
-            val decayOffset = decay.calculateTargetValue(
-                typeConverter = Offset.VectorConverter,
-                initialValue = sheepTranslation.value,
-                initialVelocity = velocity,
-            )
-
+        // Orientation
+        sensorManager.observeOrientationChanges { azimuth, pitch, roll ->
+//            if (
+//                abs(sheepRotation.value.x - pitch - 90) > DegreesThreshold ||
+//                abs(sheepRotation.value.y - roll) > DegreesThreshold
+//            ) {
             coroutineScope.launch {
-                sheepTranslation.animateTo(decayOffset, initialVelocity = velocity)
+                sheepRotation.animateTo(
+                    Offset(
+                        x = pitch,
+                        y = roll,
+                    ),
+                )
             }
+//            }
         }
 
         onDispose {
@@ -120,6 +134,8 @@ fun AnimatedSensorsScreen(
                     translationY = sheepTranslation.value.y
                     scaleX = sheepScale.value
                     scaleY = sheepScale.value
+                    rotationX = sheepRotation.value.x
+                    rotationY = sheepRotation.value.y
                 }
                 .pointerInput(PointerEventType.Press) {
                     awaitEachGesture {

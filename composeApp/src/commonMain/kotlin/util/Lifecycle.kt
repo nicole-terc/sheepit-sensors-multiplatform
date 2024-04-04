@@ -26,6 +26,7 @@ object LifecycleOwner {
 
 @Composable
 fun observeLifecycle(
+    key: Any? = Unit,
     onCreate: () -> Unit = {},
     onStart: () -> Unit = {},
     onResume: () -> Unit = {},
@@ -34,7 +35,7 @@ fun observeLifecycle(
     onDestroy: () -> Unit = {},
     onAny: () -> Unit = {},
 ) {
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key) {
         LifecycleOwner.lifecycleEvents.collect {
             when (it) {
                 LifecycleEvent.onCreate -> onCreate()
