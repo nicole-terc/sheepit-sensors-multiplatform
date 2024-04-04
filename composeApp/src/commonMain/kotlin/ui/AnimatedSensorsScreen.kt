@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +36,9 @@ import kotlinx.coroutines.launch
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType
+import util.LifecycleEvent
+import util.LifecycleOwner
+import util.observeLifecycle
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -55,6 +59,13 @@ fun AnimatedSensorsScreen(
     screenSize: ScreenSize = getScreenSize(),
     sensorManager: MultiplatformSensorManager = rememberSensorManager(),
 ) {
+    var initSensorManager by remember { mutableStateOf(0) }
+
+    observeLifecycle(
+        onResume = { initSensorManager++ },
+        onPause = { sensorManager.unregisterAll() }
+    )
+
     val coroutineScope = rememberCoroutineScope()
 
     // Sheep Properties
@@ -65,8 +76,8 @@ fun AnimatedSensorsScreen(
         upperBound = Offset(screenSize.widthPx / 2f, screenSize.heightPx / 2f),
     )
 
+
     // Gesture states
-    var lastAccelerationTimeStamp = 0L
     val decay = rememberSplineBasedDecay<Offset>()
 
     var isDragging by remember { mutableStateOf(false) }
@@ -76,7 +87,7 @@ fun AnimatedSensorsScreen(
         }
     }
 
-    DisposableEffect(sensorManager) {
+    DisposableEffect(initSensorManager) {
         sensorManager.registerListener(MultiplatformSensorType.GYROSCOPE) { sensorEvent ->
 
             val xValue = sensorEvent.values[0]
@@ -102,7 +113,7 @@ fun AnimatedSensorsScreen(
         }
 
         onDispose {
-            sensorManager.unregisterListener(MultiplatformSensorType.GYROSCOPE)
+            sensorManager.unregisterAll()
         }
     }
 

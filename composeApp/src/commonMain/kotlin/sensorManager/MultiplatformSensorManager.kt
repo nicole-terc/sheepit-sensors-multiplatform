@@ -62,9 +62,6 @@ interface MultiplatformSensorManager {
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL
     )
-
-    fun unregisterListener(sensorType: MultiplatformSensorType)
-
     fun registerListener(
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL,
@@ -87,6 +84,10 @@ interface MultiplatformSensorManager {
             samplingPeriod = samplingPeriod,
         )
     }
+
+
+    fun unregisterListener(sensorType: MultiplatformSensorType)
+    fun unregisterAll()
 
 }
 

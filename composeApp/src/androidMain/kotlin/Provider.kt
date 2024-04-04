@@ -1,4 +1,3 @@
-import android.content.Context
 import sensorManager.MultiplatformSensorManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

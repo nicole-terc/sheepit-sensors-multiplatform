@@ -60,4 +60,9 @@ class AndroidSensorManager(
     override fun unregisterListener(sensorType: MultiplatformSensorType) {
         listeners[sensorType]?.let { sensorManager.unregisterListener(it) }
     }
+
+    override fun unregisterAll() {
+        listeners.forEach { (_, listener) -> sensorManager.unregisterListener(listener) }
+        listeners.clear()
+    }
 }
