@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,23 +31,19 @@ import getScreenSize
 import kotlinx.coroutines.launch
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
+import util.DisposableEffectWithLifecycle
 import util.mapValues
-import util.observeLifecycle
 import kotlin.math.PI
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AnimatedSensorsScreen(
+    sheep: Sheep,
     modifier: Modifier = Modifier,
     screenSize: ScreenSize = getScreenSize(),
     sensorManager: MultiplatformSensorManager = rememberSensorManager(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var onResumeToggle by remember { mutableStateOf(false) }
-    observeLifecycle(
-        onResume = { onResumeToggle = !onResumeToggle },
-        onPause = { sensorManager.unregisterAll() }
-    )
 
     // Sheep Properties
     val sheepScale = remember { Animatable(1f) }
@@ -66,31 +61,34 @@ fun AnimatedSensorsScreen(
         coroutineScope.launch { sheepTranslation.snapTo(sheepTranslation.value.plus(delta)) }
     }
 
-    DisposableEffect(onResumeToggle) {
-        // Gyroscope
-//        sensorManager.registerListener(MultiplatformSensorType.GYROSCOPE) { sensorEvent ->
-//
-//            val xValue = sensorEvent.values[0]
-//            val yValue = sensorEvent.values[1]
-//            val zValue = sensorEvent.values[2]
-//
-//            if (isDragging || (abs(yValue) < AccelerationThreshold && abs(xValue) < AccelerationThreshold)) return@registerListener
-//
-//            println("GyroScopeEvent: $sensorEvent, values: ${sensorEvent.values.joinToString(",")}")
-//
-//            val velocity = Offset(SensorMagnitude.times(yValue), SensorMagnitude.times(xValue))
-//
-//            val decayOffset = decay.calculateTargetValue(
-//                typeConverter = Offset.VectorConverter,
-//                initialValue = sheepTranslation.value,
-//                initialVelocity = velocity,
-//            )
-//            coroutineScope.launch {
-//                sheepTranslation.animateTo(decayOffset, initialVelocity = velocity)
-//            }
-//        }
+    DisposableEffectWithLifecycle(
+        onPause = { sensorManager.unregisterAll() }
+    ) {
+        /*/ Gyroscope
+        sensorManager.registerListener(MultiplatformSensorType.GYROSCOPE) { sensorEvent ->
 
-        // Orientation
+            val xValue = sensorEvent.values[0]
+            val yValue = sensorEvent.values[1]
+            val zValue = sensorEvent.values[2]
+
+            if (isDragging || (abs(yValue) < AccelerationThreshold && abs(xValue) < AccelerationThreshold)) return@registerListener
+
+            println("GyroScopeEvent: $sensorEvent, values: ${sensorEvent.values.joinToString(",")}")
+
+            val velocity = Offset(SensorMagnitude.times(yValue), SensorMagnitude.times(xValue))
+
+            val decayOffset = decay.calculateTargetValue(
+                typeConverter = Offset.VectorConverter,
+                initialValue = sheepTranslation.value,
+                initialVelocity = velocity,
+            )
+            coroutineScope.launch {
+                sheepTranslation.animateTo(decayOffset, initialVelocity = velocity)
+            }
+        }
+        // */
+
+        /// Orientation
         sensorManager.observeOrientationChanges { orientation ->
             val roll = orientation.roll
             val pitch = orientation.pitch
@@ -150,17 +148,14 @@ fun AnimatedSensorsScreen(
                 )
             }
         }
+        // */
 
         // Gestures
-
-
-        onDispose {
-            sensorManager.unregisterAll()
-        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
         ComposableSheep(
+            sheep = sheep,
             modifier = Modifier.size(300.dp)
                 .align(Alignment.Center)
                 .graphicsLayer {

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    id(libs.plugins.kotlinParcelize.get().pluginId)
 }
 
 kotlin {
@@ -35,12 +36,14 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlin.immutable)
             implementation(libs.composableSheep)
+            api(libs.appyx.backstack)
+            implementation(libs.appyx.nav)
         }
     }
 }

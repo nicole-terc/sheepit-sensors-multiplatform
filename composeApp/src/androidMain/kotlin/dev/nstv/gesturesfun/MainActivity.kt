@@ -1,43 +1,46 @@
 package dev.nstv.gesturesfun
 
+import GesturesFunTheme
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import ui.App
+import com.bumble.appyx.navigation.integration.NodeActivity
+import com.bumble.appyx.navigation.integration.NodeHost
+import com.bumble.appyx.navigation.platform.AndroidLifecycle
+import ui.RootNode
 import util.LifecycleEvent
-import util.LifecycleOwner.onLifecycleEvent
 
-class MainActivity : ComponentActivity() {
+class MainActivity : NodeActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            App()
+            GesturesFunTheme {
+                NodeHost(
+                    lifecycle = AndroidLifecycle(LocalLifecycleOwner.current.lifecycle),
+                    integrationPoint = appyxV2IntegrationPoint
+                ) {
+                    RootNode(nodeContext = it)
+                }
+            }
         }
         lifecycle.addObserver(object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 when (event) {
-                    Lifecycle.Event.ON_CREATE -> onLifecycleEvent(LifecycleEvent.onCreate)
-                    Lifecycle.Event.ON_START -> onLifecycleEvent(LifecycleEvent.onStart)
-                    Lifecycle.Event.ON_RESUME -> onLifecycleEvent(LifecycleEvent.onResume)
-                    Lifecycle.Event.ON_PAUSE -> onLifecycleEvent(LifecycleEvent.onPause)
-                    Lifecycle.Event.ON_STOP -> onLifecycleEvent(LifecycleEvent.onStop)
-                    Lifecycle.Event.ON_DESTROY -> onLifecycleEvent(LifecycleEvent.onDestroy)
-                    Lifecycle.Event.ON_ANY -> onLifecycleEvent(LifecycleEvent.onAny)
+                    Lifecycle.Event.ON_CREATE -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onCreate)
+                    Lifecycle.Event.ON_START -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onStart)
+                    Lifecycle.Event.ON_RESUME -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onResume)
+                    Lifecycle.Event.ON_PAUSE -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onPause)
+                    Lifecycle.Event.ON_STOP -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onStop)
+                    Lifecycle.Event.ON_DESTROY -> util.LifecycleOwner.onLifecycleEvent(
+                        LifecycleEvent.onDestroy
+                    )
+                    Lifecycle.Event.ON_ANY -> util.LifecycleOwner.onLifecycleEvent(LifecycleEvent.onAny)
                 }
             }
         })
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }
