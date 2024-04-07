@@ -1,15 +1,16 @@
 package dev.nstv.gesturesfun.sensorManager
 
-import sensorManager.MultiplatformSensorManager
-import sensorManager.MultiplatformSensor
-import sensorManager.MultiplatformSensorEventListener
-import sensorManager.MultiplatformSensorType
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import sensorManager.MultiplatformSensorType.*
+import sensorManager.DeviceOrientation
+import sensorManager.MultiplatformSensor
+import sensorManager.MultiplatformSensorEvent
+import sensorManager.MultiplatformSensorManager
+import sensorManager.MultiplatformSensorType
+import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION
 import sensorManager.SamplingPeriod
 
 class AndroidSensorManager(
@@ -32,10 +33,12 @@ class AndroidSensorManager(
         return sensorManager.getDefaultSensor(sensorType.toSensorType())?.toMultiplatformSensor()
     }
 
+
     override fun registerListener(
-        listener: MultiplatformSensorEventListener,
         sensorType: MultiplatformSensorType,
-        samplingPeriod: SamplingPeriod
+        samplingPeriod: SamplingPeriod,
+        onAccuracyChanged: (MultiplatformSensorType?, Int) -> Unit,
+        onSensorChanged: (MultiplatformSensorEvent) -> Unit
     ) {
 
         if (listeners.containsKey(sensorType)) {
@@ -45,11 +48,11 @@ class AndroidSensorManager(
         sensorManager.getDefaultSensor(sensorType.toSensorType())?.let { sensor ->
             val sensorEventListener = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent) {
-                    listener.onSensorChanged(event.toMultiplatformSensorEvent())
+                    onSensorChanged(event.toMultiplatformSensorEvent())
                 }
 
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                    listener.onAccuracyChanged(sensor?.type?.toMultiplatformSensorType(), accuracy)
+                    onAccuracyChanged(sensor?.type?.toMultiplatformSensorType(), accuracy)
                 }
             }
 
@@ -72,7 +75,7 @@ class AndroidSensorManager(
     }
 
     override fun observeOrientationChanges(
-        onOrientationChanged: (azimuth: Float, pitch: Float, roll: Float) -> Unit
+        onOrientationChanged: (DeviceOrientation) -> Unit
     ) {
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -94,20 +97,13 @@ class AndroidSensorManager(
 
                     val orientationAngles = FloatArray(3)
                     SensorManager.getOrientation(rotationMatrix, orientationAngles)
-//
-//                    val azimuth = Math.toDegrees(orientationAngles[0].toDouble())
-//                    val pitch = Math.toDegrees(orientationAngles[1].toDouble())
-//                    val roll = Math.toDegrees(orientationAngles[2].toDouble())
-//
-//                    println("Azimuth: $azimuth, Pitch: $pitch, Roll: $roll")
-
-                    println("Azimuth: ${orientationAngles[0]}, Pitch: ${orientationAngles[1]}, Roll: ${orientationAngles[2]}")
-
-                    onOrientationChanged(
+                    val orientation = DeviceOrientation(
                         orientationAngles[0],
                         orientationAngles[1],
-                        orientationAngles[2]
+                        orientationAngles[2],
                     )
+                    orientation.prettyPrint()
+                    onOrientationChanged(orientation)
                 }
             }
 

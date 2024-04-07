@@ -11,7 +11,6 @@ actual fun rememberSensorManager(): MultiplatformSensorManager {
     return iOSSensorManager()
 }
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 actual fun getScreenSize(): ScreenSize {

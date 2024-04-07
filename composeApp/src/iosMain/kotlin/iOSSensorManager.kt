@@ -1,7 +1,8 @@
+import sensorManager.DeviceOrientation
 import sensorManager.MultiplatformSensor
+import sensorManager.MultiplatformSensorEvent
 import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType
-import sensorManager.MultiplatformSensorEventListener
 import sensorManager.SamplingPeriod
 
 class iOSSensorManager : MultiplatformSensorManager {
@@ -14,9 +15,10 @@ class iOSSensorManager : MultiplatformSensorManager {
     }
 
     override fun registerListener(
-        listener: MultiplatformSensorEventListener,
         sensorType: MultiplatformSensorType,
-        samplingPeriod: SamplingPeriod
+        samplingPeriod: SamplingPeriod,
+        onAccuracyChanged: (MultiplatformSensorType?, Int) -> Unit,
+        onSensorChanged: (MultiplatformSensorEvent) -> Unit
     ) {
         TODO("Not yet implemented")
     }
@@ -29,5 +31,7 @@ class iOSSensorManager : MultiplatformSensorManager {
         TODO("Not yet implemented")
     }
 
-
+    override fun observeOrientationChanges(onOrientationChanged: (DeviceOrientation) -> Unit) {
+        TODO("Not yet implemented")
+    }
 }

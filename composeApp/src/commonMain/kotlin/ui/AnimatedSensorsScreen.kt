@@ -34,22 +34,7 @@ import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
 import util.mapValues
 import util.observeLifecycle
-import util.toDegrees
 import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.tan
-
-data class SheepUiState(
-    val sheep: Sheep = Sheep(),
-    val position: Offset,
-    val rotation: Float,
-    val scale: Float,
-)
-
-const val SensorMagnitude = 500f
-const val AccelerationThreshold = 1f
-const val DegreesThreshold = 3f
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -106,25 +91,31 @@ fun AnimatedSensorsScreen(
 //        }
 
         // Orientation
-        sensorManager.observeOrientationChanges { azimuth, pitch, roll ->
+        sensorManager.observeOrientationChanges { orientation ->
+            val roll = orientation.roll
+            val pitch = orientation.pitch
 
             coroutineScope.launch {
-                // Straightforward orientation
-                val degreesX = mapValues(
-                    value = pitch,
-                    fromStart = -PI.toFloat() / 2,
-                    fromEnd = PI.toFloat() / 2,
-                    toStart = -90f,
-                    toEnd = 90f,
-                )
+                // Rotation
+                val degreesX =
+//                    orientation.pitchDegrees
+                    mapValues(
+                        value = pitch,
+                        fromStart = -PI.toFloat() / 2,
+                        fromEnd = PI.toFloat() / 2,
+                        toStart = -90f,
+                        toEnd = 90f,
+                    )
 
-                val degreesY = mapValues(
-                    value = roll,
-                    fromStart = -PI.toFloat(),
-                    fromEnd = PI.toFloat(),
-                    toStart = -90f,
-                    toEnd = 90f,
-                )
+                val degreesY =
+//                    orientation.rollDegrees
+                    mapValues(
+                        value = roll,
+                        fromStart = -PI.toFloat(),
+                        fromEnd = PI.toFloat(),
+                        toStart = -90f,
+                        toEnd = 90f,
+                    )
 
                 sheepRotation.animateTo(
                     Offset(
@@ -159,6 +150,9 @@ fun AnimatedSensorsScreen(
                 )
             }
         }
+
+        // Gestures
+
 
         onDispose {
             sensorManager.unregisterAll()

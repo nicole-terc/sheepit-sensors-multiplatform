@@ -1,7 +1,5 @@
 package sensorManager
 
-import kotlinx.collections.immutable.ImmutableList
-
 enum class MultiplatformSensorType {
     ACCELEROMETER,
     AMBIENT_TEMPERATURE,
@@ -50,50 +48,22 @@ data class MultiplatformSensorEvent(
     val timestamp: Long,
 )
 
-interface MultiplatformSensorEventListener {
-    fun onSensorChanged(sensorEvent: MultiplatformSensorEvent)
-    fun onAccuracyChanged(sensorType: MultiplatformSensorType?, accuracy: Int)
-}
-
 interface MultiplatformSensorManager {
     fun getSensorList(sensorType: MultiplatformSensorType = MultiplatformSensorType.TYPE_ALL): List<MultiplatformSensor>
     fun getDefaultSensor(sensorType: MultiplatformSensorType): MultiplatformSensor?
     fun registerListener(
-        listener: MultiplatformSensorEventListener,
-        sensorType: MultiplatformSensorType,
-        samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL
-    )
-
-    fun registerListener(
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL,
+        onAccuracyChanged: (MultiplatformSensorType?, Int) -> Unit = { _, _ -> },
         onSensorChanged: (MultiplatformSensorEvent) -> Unit,
-    ) {
-        registerListener(
-            listener = object : MultiplatformSensorEventListener {
-                override fun onSensorChanged(sensorEvent: MultiplatformSensorEvent) {
-                    onSensorChanged(sensorEvent)
-                }
-
-                override fun onAccuracyChanged(
-                    sensorType: MultiplatformSensorType?,
-                    accuracy: Int
-                ) {
-                    /* no op */
-                }
-            },
-            sensorType = sensorType,
-            samplingPeriod = samplingPeriod,
-        )
-    }
-
+    )
 
     fun unregisterListener(sensorType: MultiplatformSensorType)
     fun unregisterAll()
 
     // Specific Readings
     fun observeOrientationChanges(
-        onOrientationChanged: (azimuth: Float, pitch: Float, roll: Float) -> Unit
+        onOrientationChanged: (DeviceOrientation) -> Unit
     )
 }
 
