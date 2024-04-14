@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -151,7 +152,7 @@ fun AnimatedSensorsScreen(
         }
         // */
 
-        // Orientation with correction
+        /*// Orientation with correction
         sensorManager.observeOrientationChangesWithCorrection { orientation ->
             val roll = orientation.roll
             val pitch = orientation.pitch
@@ -208,6 +209,7 @@ fun AnimatedSensorsScreen(
             }
 
         }
+        // */
         // Gestures
 
     }
@@ -217,6 +219,7 @@ fun AnimatedSensorsScreen(
             sheep = sheep,
             modifier = Modifier.size(300.dp)
                 .align(Alignment.Center)
+                .animateOrientationChange()
                 .graphicsLayer {
                     translationX = sheepTranslation.value.x
                     translationY = sheepTranslation.value.y

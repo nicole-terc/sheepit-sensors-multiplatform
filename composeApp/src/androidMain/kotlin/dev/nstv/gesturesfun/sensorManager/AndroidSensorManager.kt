@@ -15,7 +15,7 @@ import sensorManager.MultiplatformSensorType.GAME_ROTATION_VECTOR
 import sensorManager.SamplingPeriod
 import util.PiFloat
 
-const val ShowSensorLog = false
+const val ShowSensorLog = true
 
 class AndroidSensorManager(
     private val context: Context
@@ -72,6 +72,9 @@ class AndroidSensorManager(
     }
 
     override fun unregisterListener(sensorType: MultiplatformSensorType) {
+        if(ShowSensorLog) {
+            println("unregistering listener for sensor type: $sensorType")
+        }
         listeners[sensorType]?.let { sensorManager.unregisterListener(it) }
     }
 
@@ -184,6 +187,6 @@ class AndroidSensorManager(
             )
         }
 
-        listeners[GAME_ROTATION_VECTOR] = sensorEventListener
+        listeners[CUSTOM_ORIENTATION] = sensorEventListener
     }
 }
