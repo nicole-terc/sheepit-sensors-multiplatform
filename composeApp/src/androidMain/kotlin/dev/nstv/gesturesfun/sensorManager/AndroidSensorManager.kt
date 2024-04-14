@@ -11,9 +11,11 @@ import sensorManager.MultiplatformSensorEvent
 import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType
 import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION
-import sensorManager.MultiplatformSensorType.GAME_ROTATION_VECTOR
+import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION_CORRECTED
 import sensorManager.SamplingPeriod
-import util.PiFloat
+import util.HalfPi
+import util.Pi
+import util.TwoPi
 
 const val ShowSensorLog = true
 
@@ -72,7 +74,7 @@ class AndroidSensorManager(
     }
 
     override fun unregisterListener(sensorType: MultiplatformSensorType) {
-        if(ShowSensorLog) {
+        if (ShowSensorLog) {
             println("unregistering listener for sensor type: $sensorType")
         }
         listeners[sensorType]?.let { sensorManager.unregisterListener(it) }
@@ -155,17 +157,13 @@ class AndroidSensorManager(
                     SensorManager.getRotationMatrixFromVector(currentRotationReading, event.values)
                     val orientationAngles = FloatArray(3) { index ->
                         when (index) {
-                            0 -> (lastRotationReading[0] * currentRotationReading[1] + lastRotationReading[3] * currentRotationReading[4] + lastRotationReading[6] * currentRotationReading[7]) * PiFloat
-                            1 -> -(lastRotationReading[2] * currentRotationReading[1] + lastRotationReading[5] * currentRotationReading[4] + lastRotationReading[8] * currentRotationReading[7]) * PiFloat
-                            2 -> -(lastRotationReading[2] * currentRotationReading[0] + lastRotationReading[5] * currentRotationReading[3] + lastRotationReading[8] * currentRotationReading[6]) * PiFloat
+                            0 -> (lastRotationReading[0] * currentRotationReading[1] + lastRotationReading[3] * currentRotationReading[4] + lastRotationReading[6] * currentRotationReading[7]) * TwoPi
+                            1 -> -(lastRotationReading[2] * currentRotationReading[1] + lastRotationReading[5] * currentRotationReading[4] + lastRotationReading[8] * currentRotationReading[7]) * HalfPi
+                            2 -> -(lastRotationReading[2] * currentRotationReading[0] + lastRotationReading[5] * currentRotationReading[3] + lastRotationReading[8] * currentRotationReading[6]) * Pi
                             else -> 0f
                         }
                     }
-                    val orientation = DeviceOrientation(
-                        orientationAngles[0],
-                        orientationAngles[1],
-                        orientationAngles[2],
-                    )
+                    val orientation = DeviceOrientation(orientationAngles)
                     if (ShowSensorLog) orientation.prettyPrint()
                     onOrientationChanged(orientation)
                 } else {
@@ -187,6 +185,6 @@ class AndroidSensorManager(
             )
         }
 
-        listeners[CUSTOM_ORIENTATION] = sensorEventListener
+        listeners[CUSTOM_ORIENTATION_CORRECTED] = sensorEventListener
     }
 }

@@ -1,5 +1,6 @@
 package util
 
+import ScreenSize
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
 import dev.nstv.composablesheep.library.util.toRadians
@@ -13,9 +14,11 @@ const val DegreesThreshold = 3f
 const val RotationDegreesThreshold = 10f
 
 // PI
-const val PiFloat = PI.toFloat()
-val PiPlusThreshold = PI.toFloat() + RotationDegreesThreshold.toRadians()
-val PiMinusThreshold = PI.toFloat() - RotationDegreesThreshold.toRadians()
+const val Pi = PI.toFloat()
+const val HalfPi = Pi / 2f
+const val TwoPi = Pi * 2f
+val PiPlusThreshold = Pi + RotationDegreesThreshold.toRadians()
+val PiMinusThreshold = Pi - RotationDegreesThreshold.toRadians()
 
 // Extensions
 fun Offset.toIntOffset() = IntOffset(x.roundToInt(), y.roundToInt())
@@ -30,5 +33,40 @@ fun mapValues(
     toStart: Float,
     toEnd: Float,
 ) = (value - fromStart) / (fromEnd - fromStart) * (toEnd - toStart) + toStart
+
+fun mapRotation(
+    angle: Float,
+    maxValue: Float = Pi,
+) = mapValues(
+    value = angle,
+    fromStart = -maxValue,
+    fromEnd = maxValue,
+    toStart = -90f,
+    toEnd = 90f,
+)
+
+fun mapTranslationWidth(
+    angle: Float,
+    screenSize: ScreenSize,
+    maxValue: Float = Pi,
+) = mapValues(
+    value = angle,
+    fromStart = -maxValue,
+    fromEnd = maxValue,
+    toStart = -screenSize.widthPx / 2f,
+    toEnd = screenSize.widthPx / 2f,
+)
+
+fun mapTranslationHeight(
+    angle: Float,
+    screenSize: ScreenSize,
+    maxValue: Float = Pi,
+) = mapValues(
+    value = angle,
+    fromStart = -maxValue,
+    fromEnd = maxValue,
+    toStart = -screenSize.heightPx / 2f,
+    toEnd = screenSize.heightPx / 2f,
+)
 
 

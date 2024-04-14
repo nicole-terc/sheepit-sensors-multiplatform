@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.draggable2D
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,14 +28,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.nstv.composablesheep.library.ComposableSheep
 import dev.nstv.composablesheep.library.model.Sheep
-import rememberScreenSize
 import kotlinx.coroutines.launch
+import rememberScreenSize
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
+import sensorManager.MultiplatformSensorType
+import ui.modifiers.animateOrientationChange
+import ui.modifiers.onSensorEvent
 import util.DisposableEffectWithLifecycle
-import util.PiFloat
-import util.mapValues
-import kotlin.math.PI
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -60,7 +60,9 @@ fun AnimatedSensorsScreen(
     val decay = rememberSplineBasedDecay<Offset>()
     var isDragging by remember { mutableStateOf(false) }
     val draggableState = rememberDraggable2DState { delta ->
-        coroutineScope.launch { sheepTranslation.snapTo(sheepTranslation.value.plus(delta)) }
+        coroutineScope.launch {
+            sheepTranslation.snapTo(sheepTranslation.value.plus(delta))
+        }
     }
 
     DisposableEffectWithLifecycle(
@@ -151,65 +153,6 @@ fun AnimatedSensorsScreen(
             }
         }
         // */
-
-        /*// Orientation with correction
-        sensorManager.observeOrientationChangesWithCorrection { orientation ->
-            val roll = orientation.roll
-            val pitch = orientation.pitch
-
-            coroutineScope.launch {
-                // Rotation
-                val degreesX = mapValues(
-                    value = pitch,
-                    fromStart = -PiFloat,
-                    fromEnd = PiFloat,
-                    toStart = -90f,
-                    toEnd = 90f,
-                )
-
-                val degreesY = mapValues(
-                    value = roll,
-                    fromStart = -PiFloat,
-                    fromEnd = PiFloat,
-                    toStart = -90f,
-                    toEnd = 90f,
-                )
-
-                sheepRotation.animateTo(
-                    Offset(
-                        x = degreesX,
-                        y = degreesY,
-                    ),
-                )
-            }
-            coroutineScope.launch {
-                // Styled movement
-                val offsetX = mapValues(
-                    value = roll,
-                    fromStart = -PiFloat,
-                    fromEnd = PiFloat,
-                    toStart = -screenSize.widthPx / 2f,
-                    toEnd = screenSize.widthPx / 2f,
-                )
-
-                val offsetY = mapValues(
-                    value = pitch,
-                    fromStart = -PiFloat,
-                    fromEnd = PiFloat,
-                    toStart = -screenSize.heightPx / 2f,
-                    toEnd = screenSize.heightPx / 2f,
-                )
-
-                sheepTranslation.animateTo(
-                    Offset(
-                        x = offsetX,
-                        y = -offsetY,
-                    )
-                )
-            }
-
-        }
-        // */
         // Gestures
 
     }
@@ -219,14 +162,17 @@ fun AnimatedSensorsScreen(
             sheep = sheep,
             modifier = Modifier.size(300.dp)
                 .align(Alignment.Center)
-                .animateOrientationChange()
+                .animateOrientationChange(
+                    enabled = !isDragging,
+                    adjusted = true,
+                )
                 .graphicsLayer {
                     translationX = sheepTranslation.value.x
                     translationY = sheepTranslation.value.y
+//                    rotationX = sheepRotation.value.x
+//                    rotationY = sheepRotation.value.y
                     scaleX = sheepScale.value
                     scaleY = sheepScale.value
-                    rotationX = sheepRotation.value.x
-                    rotationY = sheepRotation.value.y
                 }
                 .pointerInput(PointerEventType.Press) {
                     awaitEachGesture {

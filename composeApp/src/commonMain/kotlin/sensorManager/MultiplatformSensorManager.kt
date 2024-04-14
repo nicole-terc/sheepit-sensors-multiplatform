@@ -28,6 +28,7 @@ enum class MultiplatformSensorType {
     UNKNOWN,
     TYPE_ALL,
     CUSTOM_ORIENTATION,
+    CUSTOM_ORIENTATION_CORRECTED,
 }
 
 enum class SamplingPeriod {
