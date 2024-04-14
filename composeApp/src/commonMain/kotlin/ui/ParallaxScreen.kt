@@ -1,7 +1,5 @@
 package ui
 
-import ScreenSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -27,6 +25,7 @@ import rememberSensorManager
 import sensorManager.DeviceOrientation
 import sensorManager.MultiplatformSensorManager
 import util.DisposableEffectWithLifecycle
+import util.ScreenSize
 
 @Composable
 fun ParallaxScreen(

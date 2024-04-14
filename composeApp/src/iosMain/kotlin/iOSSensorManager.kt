@@ -34,4 +34,8 @@ class iOSSensorManager : MultiplatformSensorManager {
     override fun observeOrientationChanges(onOrientationChanged: (DeviceOrientation) -> Unit) {
         TODO("Not yet implemented")
     }
+
+    override fun observeOrientationChangesWithCorrection(onOrientationChanged: (DeviceOrientation) -> Unit) {
+        TODO("Not yet implemented")
+    }
 }

@@ -1,6 +1,5 @@
 package ui.modifiers
 
-import ScreenSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION
 import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION_CORRECTED
 import util.HalfPi
+import util.ScreenSize
 import util.mapRotation
 import util.mapTranslationHeight
 import util.mapTranslationWidth

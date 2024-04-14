@@ -1,6 +1,5 @@
 package util
 
-import ScreenSize
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
 import dev.nstv.composablesheep.library.util.toRadians

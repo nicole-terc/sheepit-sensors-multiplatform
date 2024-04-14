@@ -1,11 +1,9 @@
 package ui
 
-import ScreenSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.draggable2D
@@ -32,10 +30,9 @@ import kotlinx.coroutines.launch
 import rememberScreenSize
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
-import sensorManager.MultiplatformSensorType
 import ui.modifiers.animateOrientationChange
-import ui.modifiers.onSensorEvent
 import util.DisposableEffectWithLifecycle
+import util.ScreenSize
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

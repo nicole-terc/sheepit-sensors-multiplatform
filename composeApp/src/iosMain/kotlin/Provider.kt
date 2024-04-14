@@ -1,4 +1,3 @@
-import sensorManager.MultiplatformSensorManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.remember
@@ -7,7 +6,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
+import sensorManager.MultiplatformSensorManager
+import util.ScreenSize
 
 
 actual fun getSensorManager(local: (CompositionLocal<*>) -> Any): MultiplatformSensorManager {
