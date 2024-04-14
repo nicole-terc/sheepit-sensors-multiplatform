@@ -13,7 +13,7 @@ actual fun rememberSensorManager(): MultiplatformSensorManager {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-actual fun getScreenSize(): ScreenSize {
+actual fun rememberScreenSize(): ScreenSize {
     val density = LocalDensity.current
     val containerSize = LocalWindowInfo.current.containerSize
 

@@ -27,11 +27,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.nstv.composablesheep.library.ComposableSheep
 import dev.nstv.composablesheep.library.model.Sheep
-import getScreenSize
+import rememberScreenSize
 import kotlinx.coroutines.launch
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
 import util.DisposableEffectWithLifecycle
+import util.PiFloat
 import util.mapValues
 import kotlin.math.PI
 
@@ -40,7 +41,7 @@ import kotlin.math.PI
 fun AnimatedSensorsScreen(
     sheep: Sheep,
     modifier: Modifier = Modifier,
-    screenSize: ScreenSize = getScreenSize(),
+    screenSize: ScreenSize = rememberScreenSize(),
     sensorManager: MultiplatformSensorManager = rememberSensorManager(),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -88,7 +89,7 @@ fun AnimatedSensorsScreen(
         }
         // */
 
-        /// Orientation
+        /*// Orientation
         sensorManager.observeOrientationChanges { orientation ->
             val roll = orientation.roll
             val pitch = orientation.pitch
@@ -150,7 +151,65 @@ fun AnimatedSensorsScreen(
         }
         // */
 
+        // Orientation with correction
+        sensorManager.observeOrientationChangesWithCorrection { orientation ->
+            val roll = orientation.roll
+            val pitch = orientation.pitch
+
+            coroutineScope.launch {
+                // Rotation
+                val degreesX = mapValues(
+                    value = pitch,
+                    fromStart = -PiFloat,
+                    fromEnd = PiFloat,
+                    toStart = -90f,
+                    toEnd = 90f,
+                )
+
+                val degreesY = mapValues(
+                    value = roll,
+                    fromStart = -PiFloat,
+                    fromEnd = PiFloat,
+                    toStart = -90f,
+                    toEnd = 90f,
+                )
+
+                sheepRotation.animateTo(
+                    Offset(
+                        x = degreesX,
+                        y = degreesY,
+                    ),
+                )
+            }
+            coroutineScope.launch {
+                // Styled movement
+                val offsetX = mapValues(
+                    value = roll,
+                    fromStart = -PiFloat,
+                    fromEnd = PiFloat,
+                    toStart = -screenSize.widthPx / 2f,
+                    toEnd = screenSize.widthPx / 2f,
+                )
+
+                val offsetY = mapValues(
+                    value = pitch,
+                    fromStart = -PiFloat,
+                    fromEnd = PiFloat,
+                    toStart = -screenSize.heightPx / 2f,
+                    toEnd = screenSize.heightPx / 2f,
+                )
+
+                sheepTranslation.animateTo(
+                    Offset(
+                        x = offsetX,
+                        y = -offsetY,
+                    )
+                )
+            }
+
+        }
         // Gestures
+
     }
 
     Box(modifier = modifier.fillMaxSize()) {

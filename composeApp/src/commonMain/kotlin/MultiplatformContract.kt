@@ -13,7 +13,7 @@ data class ScreenSize(
 }
 
 @Composable
-expect fun getScreenSize(): ScreenSize
+expect fun rememberScreenSize(): ScreenSize
 
 @Composable
 expect fun rememberSensorManager(): MultiplatformSensorManager

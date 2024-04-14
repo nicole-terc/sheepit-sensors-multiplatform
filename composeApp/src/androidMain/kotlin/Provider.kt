@@ -16,7 +16,7 @@ actual fun rememberSensorManager(): MultiplatformSensorManager {
 
 
 @Composable
-actual fun getScreenSize(): ScreenSize {
+actual fun rememberScreenSize(): ScreenSize {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
 

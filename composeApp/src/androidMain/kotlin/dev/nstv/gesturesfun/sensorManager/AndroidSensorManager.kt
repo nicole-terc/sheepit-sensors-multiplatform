@@ -11,7 +11,11 @@ import sensorManager.MultiplatformSensorEvent
 import sensorManager.MultiplatformSensorManager
 import sensorManager.MultiplatformSensorType
 import sensorManager.MultiplatformSensorType.CUSTOM_ORIENTATION
+import sensorManager.MultiplatformSensorType.GAME_ROTATION_VECTOR
 import sensorManager.SamplingPeriod
+import util.PiFloat
+
+const val ShowSensorLog = false
 
 class AndroidSensorManager(
     private val context: Context
@@ -23,6 +27,8 @@ class AndroidSensorManager(
     // Orientation
     var accelerometerReading: FloatArray? = null
     var magnetometerReading: FloatArray? = null
+    var lastRotationReading: FloatArray = FloatArray(9)
+    var lastRotationSet = false
 
     override fun getSensorList(sensorType: MultiplatformSensorType): List<MultiplatformSensor> {
         return sensorManager.getSensorList(sensorType.toSensorType())
@@ -72,6 +78,10 @@ class AndroidSensorManager(
     override fun unregisterAll() {
         listeners.forEach { (_, listener) -> sensorManager.unregisterListener(listener) }
         listeners.clear()
+        accelerometerReading = null
+        magnetometerReading = null
+        lastRotationReading = FloatArray(9)
+        lastRotationSet = false
     }
 
     override fun observeOrientationChanges(
@@ -79,7 +89,9 @@ class AndroidSensorManager(
     ) {
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                println("event received: ${event.sensor.type.toMultiplatformSensorType()}")
+                if (ShowSensorLog) {
+                    println("event received: ${event.sensor.type.toMultiplatformSensorType()}")
+                }
                 if (event.sensor.type == Sensor.TYPE_GRAVITY) {
                     accelerometerReading = event.values
                 } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
@@ -102,7 +114,7 @@ class AndroidSensorManager(
                         orientationAngles[1],
                         orientationAngles[2],
                     )
-                    orientation.prettyPrint()
+                    if (ShowSensorLog) orientation.prettyPrint()
                     onOrientationChanged(orientation)
                 }
             }
@@ -129,5 +141,49 @@ class AndroidSensorManager(
         }
 
         listeners[CUSTOM_ORIENTATION] = sensorEventListener
+    }
+
+    // Corrected orientation to avoid Gimbal Lock
+    override fun observeOrientationChangesWithCorrection(onOrientationChanged: (DeviceOrientation) -> Unit) {
+        val sensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                if (lastRotationSet) {
+                    val currentRotationReading = FloatArray(9)
+                    SensorManager.getRotationMatrixFromVector(currentRotationReading, event.values)
+                    val orientationAngles = FloatArray(3) { index ->
+                        when (index) {
+                            0 -> (lastRotationReading[0] * currentRotationReading[1] + lastRotationReading[3] * currentRotationReading[4] + lastRotationReading[6] * currentRotationReading[7]) * PiFloat
+                            1 -> -(lastRotationReading[2] * currentRotationReading[1] + lastRotationReading[5] * currentRotationReading[4] + lastRotationReading[8] * currentRotationReading[7]) * PiFloat
+                            2 -> -(lastRotationReading[2] * currentRotationReading[0] + lastRotationReading[5] * currentRotationReading[3] + lastRotationReading[8] * currentRotationReading[6]) * PiFloat
+                            else -> 0f
+                        }
+                    }
+                    val orientation = DeviceOrientation(
+                        orientationAngles[0],
+                        orientationAngles[1],
+                        orientationAngles[2],
+                    )
+                    if (ShowSensorLog) orientation.prettyPrint()
+                    onOrientationChanged(orientation)
+                } else {
+                    lastRotationReading = FloatArray(9)
+                    SensorManager.getRotationMatrixFromVector(lastRotationReading, event.values)
+                    lastRotationSet = true
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                // Do nothing
+            }
+        }
+        sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.let {
+            sensorManager.registerListener(
+                sensorEventListener,
+                it,
+                SensorManager.SENSOR_DELAY_UI
+            )
+        }
+
+        listeners[GAME_ROTATION_VECTOR] = sensorEventListener
     }
 }

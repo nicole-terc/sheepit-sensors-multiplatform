@@ -65,5 +65,10 @@ interface MultiplatformSensorManager {
     fun observeOrientationChanges(
         onOrientationChanged: (DeviceOrientation) -> Unit
     )
+
+    // Corrected readings to avoid Gimbal Lock
+    fun observeOrientationChangesWithCorrection(
+        onOrientationChanged: (DeviceOrientation) -> Unit
+    )
 }
 
