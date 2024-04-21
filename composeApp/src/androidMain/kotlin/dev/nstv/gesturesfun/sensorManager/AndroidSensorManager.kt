@@ -149,6 +149,7 @@ class AndroidSensorManager(
     }
 
     // Corrected orientation to avoid Gimbal Lock
+    // based on: https://medium.com/@rahulbehera/sensor-based-parallax-animations-for-android-and-ios-5363f38e37ec
     override fun observeOrientationChangesWithCorrection(onOrientationChanged: (DeviceOrientation) -> Unit) {
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {

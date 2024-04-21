@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import rememberScreenSize
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
-import ui.modifiers.animateOrientationChange
+import sensorManager.modifiers.animateOrientationChange
 import util.DisposableEffectWithLifecycle
 import util.ScreenSize
 

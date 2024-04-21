@@ -27,6 +27,7 @@ import sensorManager.MultiplatformSensorManager
 import util.DisposableEffectWithLifecycle
 import util.ScreenSize
 
+// Based on: https://proandroiddev.com/parallax-effect-with-sensormanager-using-jetpack-compose-a735a2f5811b
 @Composable
 fun ParallaxScreen(
     sheep: Sheep,
@@ -39,7 +40,7 @@ fun ParallaxScreen(
     DisposableEffectWithLifecycle(
         onPause = { },
     ) {
-        sensorManager.observeOrientationChanges {
+        sensorManager.observeOrientationChangesWithCorrection {
             orientation = it
         }
     }
@@ -51,18 +52,17 @@ fun ParallaxScreen(
             modifier = Modifier
                 .offset {
                     IntOffset(
-                        x = -orientation.roll.times(30).dp.roundToPx(),
-                        y = orientation.pitch.times(40).dp.roundToPx()
+                        x = -orientation.roll.times(0.5).dp.roundToPx(),
+                        y = orientation.pitch.times(1.5).dp.roundToPx()
                     )
                 }
-                .size(300.dp)
+                .size(256.dp)
                 .align(Alignment.Center)
                 .blur(radius = 24.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
         )
 
 
-        // Edge (used to give depth to card when tilted)
-        // Has slightly slower offset change than Image Card
+        // Edge
         val edgeColor = Color.Gray.copy(alpha = 0.5f)
         ComposableSheep(
             sheep = sheep.copy(
