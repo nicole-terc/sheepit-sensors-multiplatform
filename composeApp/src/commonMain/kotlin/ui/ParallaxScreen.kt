@@ -26,6 +26,7 @@ import sensorManager.DeviceOrientation
 import sensorManager.MultiplatformSensorManager
 import util.DisposableEffectWithLifecycle
 import util.ScreenSize
+import util.ShadowSheep
 
 // Based on: https://proandroiddev.com/parallax-effect-with-sensormanager-using-jetpack-compose-a735a2f5811b
 @Composable
@@ -63,14 +64,8 @@ fun ParallaxScreen(
 
 
         // Edge
-        val edgeColor = Color.Gray.copy(alpha = 0.5f)
         ComposableSheep(
-            sheep = sheep.copy(
-                fluffColor = edgeColor,
-                headColor = edgeColor,
-                legColor = edgeColor,
-                glassesColor = edgeColor
-            ),
+            sheep = ShadowSheep,
             modifier = Modifier
                 .offset {
                     IntOffset(

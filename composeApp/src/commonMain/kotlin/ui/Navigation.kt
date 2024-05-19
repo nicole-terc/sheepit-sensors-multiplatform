@@ -52,6 +52,7 @@ class RootNode(
 
             NavTarget.SensorsFun -> node(nodeContext) { AnimatedSensorsScreen(sheeps[0]) }
             NavTarget.Parallax -> node(nodeContext) { ParallaxScreen(sheeps[1]) }
+            NavTarget.ParallaxTower -> node(nodeContext) { ParallaxTowerScreen(sheeps[2]) }
         }
 }
 
@@ -65,4 +66,7 @@ sealed class NavTarget : Parcelable {
 
     @Parcelize
     data object Parallax : NavTarget()
+
+    @Parcelize
+    data object ParallaxTower : NavTarget()
 }

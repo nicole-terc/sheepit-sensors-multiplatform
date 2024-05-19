@@ -55,6 +55,11 @@ fun ViewSelectionScreen(
                 sheep = sheeps[1],
                 navTarget = NavTarget.Parallax,
             ),
+            ScreenItem(
+                title = "Parallax Tower",
+                sheep = sheeps[2],
+                navTarget = NavTarget.ParallaxTower,
+            ),
         )
     }
 
