@@ -2,6 +2,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Density
@@ -28,7 +29,7 @@ actual fun getScreenSize(local: (CompositionLocal<*>) -> Any): ScreenSize {
 
 @Composable
 actual fun rememberSensorManager(): MultiplatformSensorManager {
-    return iOSSensorManager()
+    return remember { iOSSensorManager() }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -47,4 +48,12 @@ actual fun rememberScreenSize(): ScreenSize {
             heightPx = height,
         )
     }
+}
+
+@Composable
+actual fun PermissionsWrapper(
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    content()
 }

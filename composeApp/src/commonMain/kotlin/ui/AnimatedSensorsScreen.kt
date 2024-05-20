@@ -2,6 +2,10 @@ package ui
 
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.calculateTargetValue
@@ -23,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,8 +43,8 @@ import kotlinx.datetime.Clock
 import rememberScreenSize
 import rememberSensorManager
 import sensorManager.MultiplatformSensorManager
-import sensorManager.MultiplatformSensorType.LIGHT
-import sensorManager.MultiplatformSensorType.LINEAR_ACCELERATION
+import sensorManager.MultiplatformSensorType
+import sensorManager.MultiplatformSensorType.*
 import util.DefaultDelay
 import util.DisposableEffectWithLifecycle
 import util.GravityEarth
@@ -104,50 +109,62 @@ fun AnimatedSensorsScreen(
     ) {
 
         // Step 6.2 Rotation
-//        sensorManager.registerListener(
-//            sensorType = ROTATION_VECTOR,
-//            onSensorChanged = { event ->
-//                println(
-//                    "Rotation values: " +
-//                            "x: ${event.values[0]} " +
-//                            "y: ${event.values[1]} " +
-//                            "z: ${event.values[2]} "
-//                )
-//                coroutineScope.launch {
-//                    rotationX.animateTo(event.values[0] * 180)
-//                }
-//                coroutineScope.launch {
-//                    rotationY.animateTo(event.values[1] * 180)
-//                }
-//                coroutineScope.launch {
-//                    rotationZ.animateTo(-event.values[2] * 180)
-//                }
-//            }
-//        )
+        sensorManager.registerListener(
+            sensorType = ROTATION_VECTOR,
+            onSensorChanged = { event ->
+                println(
+                    "Rotation values: " +
+                            "x: ${event.values[0]} " +
+                            "y: ${event.values[1]} " +
+                            "z: ${event.values[2]} "
+                )
+                coroutineScope.launch {
+                    rotationX.animateTo(event.values[0] * 180)
+                }
+                coroutineScope.launch {
+                    rotationY.animateTo(event.values[1] * 180)
+                }
+                coroutineScope.launch {
+                    rotationZ.animateTo(-event.values[2] * 180)
+                }
+            }
+        )
 
-        // Step 6.2 v2 Rotation Shift
+        // Step 6.2 Rotation with orientation adjusted
         sensorManager.observeOrientationChangesWithCorrection { orientation ->
-            // Smooth animation
-            val pitch = orientation.pitch
-            val roll = orientation.roll
+            orientation.prettyPrint(degrees = true)
 
-            // Smooth Rotation
             coroutineScope.launch {
-                rotationX.animateTo(mapRotation(pitch, HalfPi))
+                rotationX.animateTo(orientation.pitchDegrees)
             }
             coroutineScope.launch {
-                rotationY.animateTo(mapRotation(roll))
-
-            }
-
-            // Smooth Translation
-            coroutineScope.launch {
-                val offsetX = mapTranslationWidth(roll, screenSize)
-                val offsetY = mapTranslationHeight(pitch, screenSize, HalfPi)
-
-                translation.animateTo(Offset(x = offsetX, y = -offsetY))
+                rotationY.animateTo(orientation.rollDegrees)
             }
         }
+
+//        // Step 6.2 v2 Rotation Shift
+//        sensorManager.observeOrientationChangesWithCorrection { orientation ->
+//            // Smooth animation
+//            val pitch = orientation.pitch
+//            val roll = orientation.roll
+//
+//            // Smooth Rotation
+//            coroutineScope.launch {
+//                rotationX.animateTo(mapRotation(pitch, HalfPi))
+//            }
+//            coroutineScope.launch {
+//                rotationY.animateTo(mapRotation(roll))
+//
+//            }
+//
+//            // Smooth Translation
+//            coroutineScope.launch {
+//                val offsetX = mapTranslationWidth(roll, screenSize)
+//                val offsetY = mapTranslationHeight(pitch, screenSize, HalfPi)
+//
+//                translation.animateTo(Offset(x = offsetX, y = -offsetY))
+//            }
+//        }
 
 
         // Step 7.2 Shake it!
@@ -300,15 +317,21 @@ fun AnimatedSensorsScreen(
 
                 }
                 // Step 1.2 clickable scale change
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        coroutineScope.launch {
-                            val newScale = if (scale.value == 1f) 1.2f else 1f
-                            scale.animateTo(newScale)
-                        }
-                    })
+//                .clickable(
+//                    interactionSource = remember { MutableInteractionSource() },
+//                    indication = null,
+//                    onClick = {
+//                        coroutineScope.launch {
+//                            val newScale = if (scale.value == 1f) 1.2f else 1f
+//                            scale.animateTo(
+//                                targetValue = newScale,
+//                                animationSpec = spring(
+//                                    dampingRatio = Spring.DampingRatioHighBouncy,
+//                                    stiffness = Spring.StiffnessHigh,
+//                                )
+//                            )
+//                        }
+//                    })
                 // Step 2.2 Double tap pointerInput || Step 3.2 Long press pointerInput
                 .pointerInput(Unit) {
                     var isSpinning: Boolean = false
@@ -316,7 +339,26 @@ fun AnimatedSensorsScreen(
                         onTap = {
                             coroutineScope.launch {
                                 val newScale = if (scale.value == 1f) 1.2f else 1f
-                                scale.animateTo(newScale)
+                                val offshootScale = if (scale.value == 1f) 1.5f else 0.7f
+                                val initialScale = if (scale.value == 1f) 0.2f else 2f
+
+                                scale.animateTo(
+                                    targetValue = newScale,
+                                    animationSpec = keyframes {
+                                        durationMillis = 500
+                                        initialScale atFraction 0.1f using LinearOutSlowInEasing
+                                        offshootScale atFraction 0.75f using FastOutLinearInEasing
+                                        newScale atFraction 1f using LinearEasing
+                                    }
+//                                    animationSpec = spring(
+//                                        dampingRatio = Spring.DampingRatioHighBouncy,
+//                                        stiffness = Spring.StiffnessMediumLow,
+//                                    )
+//                                    animationSpec = spring(
+//                                        dampingRatio = Spring.DampingRatioHighBouncy,
+//                                        stiffness = Spring.StiffnessHigh,
+//                                    )
+                                )
                             }
                         },
                         onDoubleTap = {

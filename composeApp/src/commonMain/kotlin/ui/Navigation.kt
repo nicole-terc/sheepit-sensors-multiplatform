@@ -52,7 +52,8 @@ class RootNode(
 
             NavTarget.SensorsFun -> node(nodeContext) { AnimatedSensorsScreen(sheep = sheeps[0]) }
             NavTarget.Parallax -> node(nodeContext) { ParallaxScreen(sheep = sheeps[1]) }
-            NavTarget.ParallaxTower -> node(nodeContext) { ParallaxTowerScreen(sheep = sheeps[2]) }
+            NavTarget.SheepTower -> node(nodeContext) { SheepTowerScreen(sheep = sheeps[2]) }
+            NavTarget.StepCounter -> node(nodeContext) { StepScreen(sheep = sheeps[3]) }
         }
 }
 
@@ -68,5 +69,8 @@ sealed class NavTarget : Parcelable {
     data object Parallax : NavTarget()
 
     @Parcelize
-    data object ParallaxTower : NavTarget()
+    data object SheepTower : NavTarget()
+
+    @Parcelize
+    data object StepCounter : NavTarget()
 }

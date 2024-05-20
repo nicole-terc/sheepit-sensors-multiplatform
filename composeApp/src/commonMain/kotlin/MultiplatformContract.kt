@@ -1,5 +1,6 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
+import androidx.compose.ui.Modifier
 import sensorManager.MultiplatformSensorManager
 import util.ScreenSize
 
@@ -13,3 +14,8 @@ expect fun getSensorManager(local: (CompositionLocal<*>) -> Any): MultiplatformS
 
 expect fun getScreenSize(local: (CompositionLocal<*>) -> Any): ScreenSize
 
+@Composable
+expect fun PermissionsWrapper(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+)

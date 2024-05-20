@@ -19,6 +19,7 @@ immutable = "0.3.7"
 appyx = "2.0.0-alpha10"
 parcelize = "1.9.23"
 datetime = "0.6.0"
+accompanist = "0.32.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -38,6 +39,8 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 composableSheep = { module = "dev.nstv:composablesheep", version.ref = "composableSheep" }
 appyx-nav = { module = "com.bumble.appyx:appyx-navigation", version.ref = "appyx" }
 appyx-backstack = { module = "com.bumble.appyx:backstack", version.ref = "appyx" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
