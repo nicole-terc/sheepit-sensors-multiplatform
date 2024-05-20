@@ -50,8 +50,6 @@ data class MultiplatformSensorEvent(
 )
 
 interface MultiplatformSensorManager {
-    fun getSensorList(sensorType: MultiplatformSensorType = MultiplatformSensorType.TYPE_ALL): List<MultiplatformSensor>
-    fun getDefaultSensor(sensorType: MultiplatformSensorType): MultiplatformSensor?
     fun registerListener(
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod = SamplingPeriod.NORMAL,

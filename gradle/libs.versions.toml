@@ -1,16 +1,16 @@
 [versions]
-agp = "8.3.1"
+agp = "8.4.0"
 android-compileSdk = "34"
 android-minSdk = "25"
 android-targetSdk = "34"
-androidx-activityCompose = "1.8.2"
+androidx-activityCompose = "1.9.0"
 androidx-appcompat = "1.6.1"
 androidx-constraintlayout = "2.1.4"
-androidx-core-ktx = "1.12.0"
+androidx-core-ktx = "1.13.1"
 androidx-espresso-core = "3.5.1"
-androidx-material = "1.11.0"
+androidx-material = "1.12.0"
 androidx-test-junit = "1.1.5"
-compose = "1.6.5"
+compose = "1.7.0-beta01"
 compose-plugin = "1.6.0"
 junit = "4.13.2"
 kotlin = "1.9.22"
@@ -18,11 +18,13 @@ composableSheep = "1.0.0"
 immutable = "0.3.7"
 appyx = "2.0.0-alpha10"
 parcelize = "1.9.23"
+datetime = "0.6.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlin-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "immutable" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }

@@ -50,9 +50,9 @@ class RootNode(
                 )
             }
 
-            NavTarget.SensorsFun -> node(nodeContext) { AnimatedSensorsScreen(sheeps[0]) }
-            NavTarget.Parallax -> node(nodeContext) { ParallaxScreen(sheeps[1]) }
-            NavTarget.ParallaxTower -> node(nodeContext) { ParallaxTowerScreen(sheeps[2]) }
+            NavTarget.SensorsFun -> node(nodeContext) { AnimatedSensorsScreen(sheep = sheeps[0]) }
+            NavTarget.Parallax -> node(nodeContext) { ParallaxScreen(sheep = sheeps[1]) }
+            NavTarget.ParallaxTower -> node(nodeContext) { ParallaxTowerScreen(sheep = sheeps[2]) }
         }
 }
 

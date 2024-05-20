@@ -32,16 +32,6 @@ class AndroidSensorManager(
     var lastRotationReading: FloatArray = FloatArray(9)
     var lastRotationSet = false
 
-    override fun getSensorList(sensorType: MultiplatformSensorType): List<MultiplatformSensor> {
-        return sensorManager.getSensorList(sensorType.toSensorType())
-            .map(Sensor::toMultiplatformSensor)
-    }
-
-    override fun getDefaultSensor(sensorType: MultiplatformSensorType): MultiplatformSensor? {
-        return sensorManager.getDefaultSensor(sensorType.toSensorType())?.toMultiplatformSensor()
-    }
-
-
     override fun registerListener(
         sensorType: MultiplatformSensorType,
         samplingPeriod: SamplingPeriod,

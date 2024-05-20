@@ -41,6 +41,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlin.immutable)
+            implementation(libs.kotlin.datetime)
             implementation(libs.composableSheep)
             api(libs.appyx.backstack)
             implementation(libs.appyx.nav)
