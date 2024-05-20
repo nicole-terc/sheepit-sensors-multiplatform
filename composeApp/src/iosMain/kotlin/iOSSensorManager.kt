@@ -1,9 +1,22 @@
+import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCClass
 import kotlinx.cinterop.useContents
 import kotlinx.datetime.Clock
+import objcnames.classes.Protocol
 import platform.CoreMotion.CMAttitudeReferenceFrameXMagneticNorthZVertical
 import platform.CoreMotion.CMMotionManager
+import platform.Foundation.NSError
 import platform.Foundation.NSOperationQueue
+import platform.SensorKit.SRAuthorizationStatus
+import platform.SensorKit.SRFetchRequest
+import platform.SensorKit.SRFetchResult
+import platform.SensorKit.SRSensorAmbientLightSensor
+import platform.SensorKit.SRSensorReader
+import platform.SensorKit.SRSensorReaderDelegateProtocol
+import platform.darwin.NSObject
+import platform.darwin.NSUInteger
+import platform.posix.err
 import sensorManager.DeviceOrientation
 import sensorManager.MultiplatformSensor
 import sensorManager.MultiplatformSensorEvent
@@ -14,12 +27,15 @@ import util.HalfPi
 import util.Pi
 import util.TwoPi
 import util.mapValues
+import kotlin.native.internal.collectReferenceFieldValues
 
 @OptIn(ExperimentalForeignApi::class)
 class iOSSensorManager : MultiplatformSensorManager {
     private val motionManager = CMMotionManager().apply {
         deviceMotionUpdateInterval = SamplingPeriod.GAME.toUpdateInterval()
     }
+
+    private val reader = SRSensorReader(sensor = SRSensorAmbientLightSensor)
 
     override fun registerListener(
         sensorType: MultiplatformSensorType,
@@ -30,9 +46,11 @@ class iOSSensorManager : MultiplatformSensorManager {
         when (sensorType) {
             MultiplatformSensorType.LINEAR_ACCELERATION,
             MultiplatformSensorType.ACCELEROMETER -> startAccelerometerUpdates(onSensorChanged)
+
             MultiplatformSensorType.GAME_ROTATION_VECTOR,
             MultiplatformSensorType.ROTATION_VECTOR,
             MultiplatformSensorType.GYROSCOPE -> startGyroscopeUpdates(onSensorChanged)
+
             MultiplatformSensorType.CUSTOM_ORIENTATION -> observeOrientationChanges {
                 onSensorChanged(
                     MultiplatformSensorEvent(
@@ -42,6 +60,7 @@ class iOSSensorManager : MultiplatformSensorManager {
                     )
                 )
             }
+
             MultiplatformSensorType.CUSTOM_ORIENTATION_CORRECTED -> observeOrientationChangesWithCorrection {
                 onSensorChanged(
                     MultiplatformSensorEvent(
@@ -51,6 +70,8 @@ class iOSSensorManager : MultiplatformSensorManager {
                     )
                 )
             }
+
+            MultiplatformSensorType.LIGHT -> startLightUpdates(onSensorChanged)
             else -> {
                 // Do nothing
             }
@@ -162,4 +183,109 @@ class iOSSensorManager : MultiplatformSensorManager {
             }
         }
     }
+
+    // Requires a developer account and a provisioning profile to work
+    // more info: https://developer.apple.com/documentation/sensorkit/configuring_your_project_for_sensor_reading
+    private fun startLightUpdates(
+        onSensorChanged: (MultiplatformSensorEvent) -> Unit,
+    ) {
+        SRSensorReader.requestAuthorizationForSensors(setOf(SRSensorAmbientLightSensor)) { error ->
+            error?.let {
+                println("Error requesting authorization for light sensor: $it")
+                return@requestAuthorizationForSensors
+            } ?: println("Dialog dismissed")
+        }
+        reader.delegate = ReaderDelegate(onSensorChanged)
+    }
+
+    private class ReaderDelegate(
+        val onSensorChanged: (MultiplatformSensorEvent) -> Unit
+    ) : SRSensorReaderDelegateProtocol, NSObject() {
+
+        override fun sensorReader(
+            reader: SRSensorReader,
+            fetchingRequest: SRFetchRequest,
+            didFetchResult: SRFetchResult
+        ): Boolean {
+            println("light: ${didFetchResult.sample}")
+            onSensorChanged(
+                MultiplatformSensorEvent(
+                    values = floatArrayOf(didFetchResult.sample as? Float ?: 0.0f),
+                    accuracy = 0,
+                    timestamp = Clock.System.now().toEpochMilliseconds(),
+                )
+            )
+            return true
+        }
+
+        override fun sensorReader(
+            reader: SRSensorReader,
+            didChangeAuthorizationStatus: SRAuthorizationStatus
+        ) {
+            if (didChangeAuthorizationStatus.toInt() == 1) {
+                println("Light Sensor authorized")
+                reader.startRecording()
+            } else {
+                println("Light Sensor not authorized")
+            }
+        }
+
+        override fun description(): String? {
+            return "Light Sensor"
+        }
+
+        override fun hash(): NSUInteger {
+            return 0u
+        }
+
+        override fun superclass(): ObjCClass? {
+            return null
+        }
+
+        override fun `class`(): ObjCClass? {
+            return null
+        }
+
+        override fun conformsToProtocol(aProtocol: Protocol?): Boolean {
+            return true
+        }
+
+        override fun isEqual(`object`: Any?): Boolean {
+            return false
+        }
+
+        override fun isKindOfClass(aClass: ObjCClass?): Boolean {
+            return true
+        }
+
+        override fun isMemberOfClass(aClass: ObjCClass?): Boolean {
+            return false
+        }
+
+        override fun isProxy(): Boolean {
+            return true
+        }
+
+        override fun performSelector(aSelector: COpaquePointer?): Any? {
+            return null
+        }
+
+        override fun performSelector(
+            aSelector: COpaquePointer?,
+            withObject: Any?,
+            _withObject: Any?
+        ): Any? {
+            return null
+        }
+
+        override fun performSelector(aSelector: COpaquePointer?, withObject: Any?): Any? {
+            return null
+        }
+
+        override fun respondsToSelector(aSelector: COpaquePointer?): Boolean {
+            return true
+        }
+
+    }
 }
+
