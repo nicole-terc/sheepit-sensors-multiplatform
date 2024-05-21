@@ -24,8 +24,8 @@ class iOSSensorManager : MultiplatformSensorManager {
     private val motionManager = CMMotionManager().apply {
         deviceMotionUpdateInterval = SamplingPeriod.GAME.toUpdateInterval()
     }
-    private val activityManager = CMMotionActivityManager()
-    private val pedometerManager = CMPedometer()
+    private val activityManager = CMMotionActivityManager() // Detect activity
+    private val pedometerManager = CMPedometer() // Step counter
 //    private val reader = SRSensorReader(sensor = SRSensorAmbientLightSensor)
 
     override fun registerListener(
@@ -80,6 +80,9 @@ class iOSSensorManager : MultiplatformSensorManager {
         motionManager.stopGyroUpdates()
         motionManager.stopMagnetometerUpdates()
         motionManager.stopAccelerometerUpdates()
+        pedometerManager.stopPedometerUpdates()
+        pedometerManager.stopPedometerEventUpdates()
+        activityManager.stopActivityUpdates()
 //        reader.startRecording()
     }
 

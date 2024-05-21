@@ -62,10 +62,11 @@ import kotlin.math.sqrt
 fun AnimatedSensorsScreen(
     modifier: Modifier = Modifier,
     sheep: Sheep = Sheep(fluffColor = SheepColor.Green),
-    sensorManager: MultiplatformSensorManager = rememberSensorManager(),
+//    sensorManager: MultiplatformSensorManager = rememberSensorManager(),
     screenSize: ScreenSize = rememberScreenSize(),
 ) {
 
+    val sensorManager: MultiplatformSensorManager = rememberSensorManager()
     val coroutineScope = rememberCoroutineScope()
 
     // Properties to animate
@@ -103,32 +104,161 @@ fun AnimatedSensorsScreen(
     val fluffColor = remember { Animatable(SheepColor.Green) }
     val glassesColor = remember { Animatable(SheepColor.Black) }
 
+    fun doShakeMove() {
+        val duration = 800
+        // Translation
+        coroutineScope.launch {
+            translation.animateTo(
+                targetValue = Offset.Zero,
+                animationSpec = keyframes {
+                    durationMillis = duration
+                    Offset.Zero atFraction 0f
+                    Offset(x = screenSize.widthPx * 0.33f, y = 0f) atFraction 0.25f
+                    Offset.Zero atFraction 0.5f
+                    Offset(x = screenSize.widthPx * -0.33f, y = 0f) atFraction 0.75f
+                    Offset.Zero atFraction 1f
+                }
+            )
+            translation.animateTo(
+                targetValue = Offset.Zero,
+                animationSpec = keyframes {
+                    durationMillis = 200
+                    Offset.Zero atFraction 0f
+                    Offset(x = screenSize.widthPx * 0.1f, y = 0f) atFraction 0.25f
+                    Offset.Zero atFraction 0.5f
+                    Offset(x = screenSize.widthPx * -0.1f, y = 0f) atFraction 0.75f
+                    Offset.Zero atFraction 1f
+                }
+            )
+        }
+
+        //Scale
+        coroutineScope.launch {
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = backAndForthKeyframes(1f, 1.1f, duration = duration)
+            )
+        }
+
+        // Rotation
+        val maxAngle = 225f
+        coroutineScope.launch {
+            rotationZ.animateTo(
+                targetValue = 0f,
+                animationSpec = keyframes {
+                    durationMillis = duration
+                    0f atFraction 0f
+                    (maxAngle) atFraction 0.25f
+                    0f atFraction 0.5f
+                    (-maxAngle) atFraction 0.75f
+                    0f atFraction 1f
+                }
+            )
+            rotationZ.animateTo(
+                targetValue = 0f,
+                animationSpec = sideToSideKeyframes(0f, 25f, duration = 200)
+            )
+        }
+    }
+
+    fun doSideToSideMove() {
+        // Translation
+        coroutineScope.launch {
+            translation.animateTo(
+                targetValue = Offset.Zero,
+                animationSpec = keyframes {
+                    durationMillis = 500
+                    Offset.Zero atFraction 0f
+                    Offset(x = screenSize.widthPx * 0.33f, y = 0f) atFraction 0.25f
+                    Offset.Zero atFraction 0.5f
+                    Offset(x = screenSize.widthPx * -0.33f, y = 0f) atFraction 0.75f
+                    Offset.Zero atFraction 1f
+                }
+            )
+        }
+        //Scale
+        coroutineScope.launch {
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = backAndForthKeyframes(1f, 0.5f)
+            )
+        }
+
+        // Rotation
+        coroutineScope.launch {
+            rotationY.animateTo(
+                targetValue = 0f,
+                animationSpec = backAndForthKeyframes(0f, 90f)
+            )
+        }
+    }
+
+    // 5.2.2 Fling
+    fun doFlingMove(velocity: Velocity) {
+        //1. Calculate target offset based on velocity
+        val velocityOffset = Offset(velocity.x / 2f, velocity.y / 2f)
+
+        val targetOffset = decay.calculateTargetValue(
+            typeConverter = Offset.VectorConverter,
+            initialValue = translation.value,
+            initialVelocity = velocityOffset,
+        )
+
+        // 2. If the target offset is within bounds, animate to it
+        if (targetOffset.x < screenSize.halfSize.x && targetOffset.x > -screenSize.halfSize.x &&
+            targetOffset.y < screenSize.halfSize.y && targetOffset.y > -screenSize.halfSize.y
+        ) {
+            coroutineScope.launch {
+                translation.animateDecay(velocityOffset, decay)
+            }
+        }
+        // 3. If not, animate to farthest point within bounds and then animate back to center
+        else {
+            coroutineScope.launch {
+                val adjustedOffset = Offset(
+                    x = if (targetOffset.x < -screenSize.halfSize.x) -screenSize.halfSize.x else if (targetOffset.x > screenSize.halfSize.x) screenSize.halfSize.x else targetOffset.x,
+                    y = if (targetOffset.y < -screenSize.halfSize.y) -screenSize.halfSize.y else if (targetOffset.y > screenSize.halfSize.y) screenSize.halfSize.y else targetOffset.y
+                )
+                translation.animateTo(adjustedOffset)
+
+                translation.animateTo(
+                    Offset(0f, 0f),
+                    spring(
+                        stiffness = Spring.StiffnessMedium,
+                        dampingRatio = Spring.DampingRatioMediumBouncy
+                    )
+                )
+            }
+        }
+    }
+
+
     DisposableEffectWithLifecycle(
         key = sensorManager,
         onPause = { sensorManager.unregisterAll() }
     ) {
 
         // Step 6.2 Rotation
-        sensorManager.registerListener(
-            sensorType = ROTATION_VECTOR,
-            onSensorChanged = { event ->
-                println(
-                    "Rotation values: " +
-                            "x: ${event.values[0]} " +
-                            "y: ${event.values[1]} " +
-                            "z: ${event.values[2]} "
-                )
-                coroutineScope.launch {
-                    rotationX.animateTo(event.values[0] * 180)
-                }
-                coroutineScope.launch {
-                    rotationY.animateTo(event.values[1] * 180)
-                }
-                coroutineScope.launch {
-                    rotationZ.animateTo(-event.values[2] * 180)
-                }
-            }
-        )
+//        sensorManager.registerListener(
+//            sensorType = ROTATION_VECTOR,
+//            onSensorChanged = { event ->
+//                println(
+//                    "Rotation values: " +
+//                            "x: ${event.values[0]} " +
+//                            "y: ${event.values[1]} " +
+//                            "z: ${event.values[2]} "
+//                )
+//                coroutineScope.launch {
+//                    rotationX.animateTo(event.values[0] * 180)
+//                }
+//                coroutineScope.launch {
+//                    rotationY.animateTo(event.values[1] * 180)
+//                }
+//                coroutineScope.launch {
+//                    rotationZ.animateTo(-event.values[2] * 180)
+//                }
+//            }
+//        )
 
         // Step 6.2 Rotation with orientation adjusted
         sensorManager.observeOrientationChangesWithCorrection { orientation ->
@@ -195,40 +325,10 @@ fun AnimatedSensorsScreen(
                 ) {
                     isShaking = false
                     // Shake ended
-                    // Translation
-                    coroutineScope.launch {
-                        translation.animateTo(
-                            targetValue = Offset.Zero,
-                            animationSpec = keyframes {
-                                durationMillis = 500
-                                Offset.Zero atFraction 0f
-                                Offset(x = screenSize.widthPx * 0.33f, y = 0f) atFraction 0.25f
-                                Offset.Zero atFraction 0.5f
-                                Offset(x = screenSize.widthPx * -0.33f, y = 0f) atFraction 0.75f
-                                Offset.Zero atFraction 1f
-                            }
-                        )
-                    }
-                    //Scale
-                    coroutineScope.launch {
-                        scale.animateTo(
-                            targetValue = 1f,
-                            animationSpec = backAndForthKeyframes(1f, 0.5f)
-                        )
-                    }
-
-                    // Rotation
-                    coroutineScope.launch {
-                        rotationY.animateTo(
-                            targetValue = 0f,
-                            animationSpec = sideToSideKeyframes(0f, 90f)
-                        )
-                    }
-
+                    doShakeMove()
                 }
                 lastAcceleration = currentAcceleration
             })
-
 
         // Step 8.2 Bonus
         sensorManager.registerListener(
@@ -258,45 +358,6 @@ fun AnimatedSensorsScreen(
         )
     }
 
-    // 5.2.2 Fling
-    fun doFlingMove(velocity: Velocity) {
-        //1. Calculate target offset based on velocity
-        val velocityOffset = Offset(velocity.x / 2f, velocity.y / 2f)
-
-        val targetOffset = decay.calculateTargetValue(
-            typeConverter = Offset.VectorConverter,
-            initialValue = translation.value,
-            initialVelocity = velocityOffset,
-        )
-
-        // 2. If the target offset is within bounds, animate to it
-        if (targetOffset.x < screenSize.halfSize.x && targetOffset.x > -screenSize.halfSize.x &&
-            targetOffset.y < screenSize.halfSize.y && targetOffset.y > -screenSize.halfSize.y
-        ) {
-            coroutineScope.launch {
-                translation.animateDecay(velocityOffset, decay)
-            }
-        }
-        // 3. If not, animate to farthest point within bounds and then animate back to center
-        else {
-            coroutineScope.launch {
-                val adjustedOffset = Offset(
-                    x = if (targetOffset.x < -screenSize.halfSize.x) -screenSize.halfSize.x else if (targetOffset.x > screenSize.halfSize.x) screenSize.halfSize.x else targetOffset.x,
-                    y = if (targetOffset.y < -screenSize.halfSize.y) -screenSize.halfSize.y else if (targetOffset.y > screenSize.halfSize.y) screenSize.halfSize.y else targetOffset.y
-                )
-                translation.animateTo(adjustedOffset)
-
-                translation.animateTo(
-                    Offset(0f, 0f),
-                    spring(
-                        stiffness = Spring.StiffnessMedium,
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                )
-            }
-        }
-    }
-
     Box(modifier = modifier.fillMaxSize()) {
         ComposableSheep(
             sheep = sheep,
@@ -314,7 +375,6 @@ fun AnimatedSensorsScreen(
                     this.rotationZ = rotationZ.value
                     translationX = translation.value.x
                     translationY = translation.value.y
-
                 }
                 // Step 1.2 clickable scale change
 //                .clickable(
@@ -362,6 +422,7 @@ fun AnimatedSensorsScreen(
                             }
                         },
                         onDoubleTap = {
+//                            doShakeMove()
                             coroutineScope.launch {
                                 listOf(-45f, 0f, 45f, 0f).forEach {
                                     rotationZ.animateTo(
