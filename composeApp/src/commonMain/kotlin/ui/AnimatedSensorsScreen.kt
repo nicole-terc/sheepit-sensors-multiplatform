@@ -249,13 +249,13 @@ fun AnimatedSensorsScreen(
 //                            "z: ${event.values[2]} "
 //                )
 //                coroutineScope.launch {
-//                    rotationX.animateTo(event.values[0] * 180)
+//                    rotationX.snapTo(event.values[0] * 180)
 //                }
 //                coroutineScope.launch {
-//                    rotationY.animateTo(event.values[1] * 180)
+//                    rotationY.snapTo(event.values[1] * 180)
 //                }
 //                coroutineScope.launch {
-//                    rotationZ.animateTo(-event.values[2] * 180)
+//                    rotationZ.snapTo(-event.values[2] * 180)
 //                }
 //            }
 //        )
@@ -265,10 +265,10 @@ fun AnimatedSensorsScreen(
             orientation.prettyPrint(degrees = true)
 
             coroutineScope.launch {
-                rotationX.animateTo(orientation.pitchDegrees)
+                rotationX.snapTo(orientation.pitchDegrees)
             }
             coroutineScope.launch {
-                rotationY.animateTo(orientation.rollDegrees)
+                rotationY.snapTo(orientation.rollDegrees)
             }
         }
 

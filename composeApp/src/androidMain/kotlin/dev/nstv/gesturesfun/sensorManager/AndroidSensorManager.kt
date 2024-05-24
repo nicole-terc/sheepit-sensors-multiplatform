@@ -148,9 +148,9 @@ class AndroidSensorManager(
                     SensorManager.getRotationMatrixFromVector(currentRotationReading, event.values)
                     val orientationAngles = FloatArray(3) { index ->
                         when (index) {
-                            0 -> (lastRotationReading[0] * currentRotationReading[1] + lastRotationReading[3] * currentRotationReading[4] + lastRotationReading[6] * currentRotationReading[7]) * TwoPi
+                            0 -> -(lastRotationReading[0] * currentRotationReading[1] + lastRotationReading[3] * currentRotationReading[4] + lastRotationReading[6] * currentRotationReading[7]) * HalfPi
                             1 -> -(lastRotationReading[2] * currentRotationReading[1] + lastRotationReading[5] * currentRotationReading[4] + lastRotationReading[8] * currentRotationReading[7]) * HalfPi
-                            2 -> -(lastRotationReading[2] * currentRotationReading[0] + lastRotationReading[5] * currentRotationReading[3] + lastRotationReading[8] * currentRotationReading[6]) * Pi
+                            2 -> -(lastRotationReading[2] * currentRotationReading[0] + lastRotationReading[5] * currentRotationReading[3] + lastRotationReading[8] * currentRotationReading[6]) * HalfPi
                             else -> 0f
                         }
                     }
